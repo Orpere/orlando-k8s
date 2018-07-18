@@ -1,0 +1,18 @@
+---
+# install dependencies on the cluster 
+ - import_playbook: dep.yml
+# install and configure master 
+ - import_playbook: master.yml
+# install and configure workers 
+ - import_playbook: wokers.yml
+# install and configyre kubectl on the master 
+ - import_playbook: conf.yml
+# install a pods network by default weave.works and kubernetes dashboard 
+# you can find admin token to auth on ./configurations folder 
+ - import_playbook: pods.yml
+# install traefik daemond set 
+ - import_playbook: ingress.yml
+#sort helm issues 
+#kubectl create clusterrolebinding add-on-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:default
+ - import_playbook: create-user-admin.yml
+ #create an admin user 

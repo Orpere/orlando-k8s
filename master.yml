@@ -1,0 +1,21 @@
+- hosts: MASTERS
+  become: true
+  gather_facts: false
+  pre_tasks:
+    - name: check docker is working
+      service: name=docker state=started
+      tags: docker
+  tasks:
+    - name: start kubadm
+      command: kubeadm init
+    - name: Wait 300 seconds for port 6443 to become open on the host, don't start checking for 60 seconds
+      wait_for:
+        port: 6443
+        delay: 60
+    - name: print the join command
+      shell: echo '#!/bin/bash' > join_token.sh && kubeadm token create --print-join-command >> join_token.sh
+    - name: fetch the tmp value to the join_token.sh
+      fetch:
+        src: join_token.sh
+        dest: ./configurations/join_token.sh
+        flat: yes

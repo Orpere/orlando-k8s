@@ -1,0 +1,74 @@
+- hosts: all
+  become: true
+  gather_facts: false
+  pre_tasks:
+    - name: install epel-release
+      raw: yum -y install epel-release
+    - name: disable selinux
+      selinux:
+        state: disabled
+    - name: disable firewalld
+      service: name=firewalld enabled=no state=stopped
+  tasks:
+     - name: yum update
+       raw: yum -y update
+     - name: Install host packages
+       action: yum name={{item}} state=installed
+       with_items:
+            - tree
+            - nmon
+            - git
+            - vim
+            - curl
+            - python-pip
+            - python-setuptools
+            - wget
+     - name: Install python setup tools
+       yum: name=python-setuptools
+       tags: docker
+     - name: Install Pypi
+       easy_install: name=pip
+       tags: docker
+     - name: Install docker-py
+       pip: name=docker-py
+       tags: docker
+     - name: Install Docker
+       yum: name=docker state=latest
+       tags: docker
+     - name: Make sure Docker is running
+       service: name=docker state=started
+       tags: docker
+     - name: enable docker
+       systemd:
+         name: docker
+         enabled: yes
+     - name: Add kubernetes repo
+       yum_repository:
+          name: kubernetes
+          description: kubernetes repo
+          baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+          gpgkey: https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+          gpgcheck: yes
+     - name: yum update
+       raw: yum -y update
+     - name: Install host packages
+       action: yum name={{item}} state=installed
+       with_items:
+           - ebtables
+           - ethtool
+           - kubelet
+           - kubeadm
+           - kubectl
+           - libselinux-python
+     - name: set selinux to permissive
+       selinux:
+        state: disabled
+     - name: Make sure a service is running
+       systemd: state=started name=kubelet
+     - name: enable kubelet
+       systemd:
+         name: kubelet
+         enabled: yes
+     - name: fix centos routing
+       script: centos-fw.sh
+

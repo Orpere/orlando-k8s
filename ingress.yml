@@ -1,0 +1,11 @@
+- hosts: MASTERS
+  gather_facts: false
+  become: true
+  tasks:
+
+    - name: kubectl start network pod
+      raw: kubectl --kubeconfig /etc/kubernetes/admin.conf apply -f https://raw.githubusercontent.com/containous/traefik/master/examples/k8s/traefik-ds.yaml
+      args:
+      executable: /bin/bash
+
+#is node routed so open in any pod on 8080

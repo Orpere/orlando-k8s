@@ -1,0 +1,13 @@
+- hosts: WORKERS
+  become: true
+  #gather_facts: false
+  pre_tasks:
+    - name: check docker is working
+      service: name=docker state=started
+      tags: docker
+    - name: check kublet is working
+      service: name=kubelet state=started
+      tags: kubelet
+  tasks:
+    - name: start add to the cluster
+      script: ./configurations/join_token.sh

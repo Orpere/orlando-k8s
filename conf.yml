@@ -1,0 +1,10 @@
+- hosts: MASTERS
+  become: true
+  gather_facts: false
+  tasks:
+    - name: copy config.conf
+      become: true
+      fetch:
+        src: /etc/kubernetes/admin.conf
+        dest: ./configurations/config-kubectl
+        flat: yes

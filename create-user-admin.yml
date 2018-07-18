@@ -1,0 +1,23 @@
+- hosts: MASTERS
+  gather_facts: false
+  become: true
+  vars: 
+      user: admin-user
+      namespace: kube-system
+      ClusterRoleName: cluster-admin
+  tasks:
+    - name: add the themplate to master
+      template: src=templates/user.yaml.j2 dest=/home/centos/user.yaml 
+                            
+    - name: kubectl create user-admin
+      raw: kubectl --kubeconfig /etc/kubernetes/admin.conf apply -f /home/centos/user.yaml 
+      args:
+      executable: /bin/bash     
+    - name: get token
+      become: true 
+      raw: kubectl --kubeconfig /etc/kubernetes/admin.conf -n kube-system describe secret  $(kubectl --kubeconfig /etc/kubernetes/admin.conf -n kube-system get secret | grep admin-user | awk '{print $1}') > admin-user
+    - name: fetch admin token for authenticate the dashboard 
+      fetch:
+        src: admin-user 
+        dest: ./configurations/admin-user
+        flat: yes
